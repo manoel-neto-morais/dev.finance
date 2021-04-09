@@ -244,10 +244,12 @@ td.description{
 
 td.income{
     color: #12a454;
+    
 }
 
 td.expense{
     color: #e92929;
+    white-space: nowrap;
 }
 table th{
     background: white;
@@ -255,6 +257,7 @@ table th{
     font-weight: normal;
     padding: 1rem 2rem;  
     text-align: left;
+    
 }
 
 table thead th:first-child,
@@ -291,6 +294,6 @@ footer h3{
         grid-template-columns: 1fr 1fr 1fr; /*aqui eu determino o template para colunas*/
         gap: 2rem; /*espaço entre os elementos*/
     }
-    
-    
+
+   
 }
