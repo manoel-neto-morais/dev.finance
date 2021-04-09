@@ -17,45 +17,45 @@ const Modal = {
 btnNew.onclick = Modal.open
 btnCancel.onclick = Modal.close
 */
+
+
+
 //Esta função modal usa a função toggle() que verifica se o tonken esta na lista de classes. Se não tiver, add. Se tiver, remove.
 const modal = () => {
     document.querySelector(".modal-overlay").classList.toggle('active')
 }
-
 btnNew.onclick = modal
 btnCancel.onclick = modal
-
-
-//====== transações ======
 
 //array de transações: acomodará as transações cadastradas
 const transactions = [
     {
-        id: 1,
         description: 'luz',
         amount: -50050,
         date: '23/01/2021'
     },
     {
-        id: 2,
         description: 'Website',
         amount: 60000,
         date: '01/01/2021'
     },
     {
-        id: 3,
         description: 'Internet',
         amount: -20000,
         date: '01/01/2021'
     }
 ]
-
 // objeto contendo os métodos que serão utilizados
 const Transactions = {
     all: transactions,
 
     add(t){
         Transactions.all.push(t)
+        App.reload()
+    },
+
+    remove(index){
+        Transactions.all.splice(index, 1)
         App.reload()
     },
     
@@ -97,6 +97,8 @@ const DOM = {
         
         
     },
+
+    
     innerHTMLTransaction(transaction){
         
         //a variável CSSclass é utilada para saber se o amount da transação é maior ou enor que zero para então determinarmos a class CSS que a transação terá.
@@ -110,7 +112,7 @@ const DOM = {
             <td class="${CSSclass}">${formatAmount}</td>
             <td class="date">${transaction.date}</td>
             <td>
-                <img src="assets/img/minus.svg" alt="Remover transação">
+                <img id="btnMinus" src="assets/img/minus.svg" alt="Remover transação">
             </td>
        
         `
@@ -128,7 +130,6 @@ const DOM = {
         DOM.transactionContainer.innerHTML = ""
     }
 }
-
 //objeto de funções uteis
 const Utils = {
     
@@ -152,6 +153,42 @@ const Utils = {
     }
 }
 
+
+const Form = {
+    description: document.querySelector("input#description"),
+    amount: document.querySelector("input#amount"),
+    date: document.querySelector("input#date"),
+
+    getValues(){
+        return {
+            description: Form.description.value,
+            amount: Form.amount.value,
+            date: Form.date.value
+        }
+    },
+
+    validateFields(){
+        const {description, amount, date } = Form.getValues()
+
+        if (description.trim() === "" || amount.trim() === "" || date.trim() === ""){
+            throw new Error("Por favor, preencha todos os campos!")
+        }
+    },
+
+    submit(e){
+        e.preventDefault() //interrompe o funcionamento padrão
+        
+        try{
+            Form.validateFields()
+        }catch(error){
+            alert(error.message)
+        }
+        
+        
+        
+
+    }
+}
 const App = {
     init(){
         //o laço forEach vai chamar o método addTransaction() de acordo com  número de elemntos do array transactions. 
@@ -167,15 +204,7 @@ const App = {
     }
 }
 
+
 App.init()
 
 
-transactions.push({
-    id: 4,
-    description: 'gas',
-    amount: 40050,
-    date: '21/01/2021'
-})
-
-
-App.reload()
