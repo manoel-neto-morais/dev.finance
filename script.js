@@ -3,7 +3,7 @@
 //====== ABERTURA E FECHAMENTO DO MODAL ======
 var btnNew = document.querySelector(".button.new")
 var btnCancel = document.querySelector(".button.cancel")
-/* esta versão cria um objeto Modal e coloca duas funções: open() que adiciona a a classe active e close() que remove.
+//esta versão cria um objeto Modal e coloca duas funções: open() que adiciona a a classe active e close() que remove.
 const Modal = {
     open(){
         document.querySelector(".modal-overlay").classList.add('active')
@@ -16,38 +16,31 @@ const Modal = {
 
 btnNew.onclick = Modal.open
 btnCancel.onclick = Modal.close
-*/
 
 
 
-//Esta função modal usa a função toggle() que verifica se o tonken esta na lista de classes. Se não tiver, add. Se tiver, remove.
+
+/*Esta função modal usa a função toggle() que verifica se o tonken esta na lista de classes. Se não tiver, add. Se tiver, remove.
 const modal = () => {
     document.querySelector(".modal-overlay").classList.toggle('active')
 }
 btnNew.onclick = modal
 btnCancel.onclick = modal
+*/
 
-//array de transações: acomodará as transações cadastradas
-const transactions = [
-    {
-        description: 'luz',
-        amount: -50050,
-        date: '23/01/2021'
-    },
-    {
-        description: 'Website',
-        amount: 60000,
-        date: '01/01/2021'
-    },
-    {
-        description: 'Internet',
-        amount: -20000,
-        date: '01/01/2021'
+// objeto de funções de armazenamento e captura no/do localStorage
+const Storage = {
+    get(){
+        return JSON.parse(localStorage.getItem("dev.finances:transaction")) || []
+    }, 
+    set(t){
+        localStorage.setItem("dev.finances:transaction", JSON.stringify(t))
     }
-]
+}
+
 // objeto contendo os métodos que serão utilizados
 const Transactions = {
-    all: transactions,
+    all: Storage.get(),
 
     add(t){
         Transactions.all.push(t)
@@ -91,15 +84,15 @@ const DOM = {
         
         
         const tr = document.createElement("tr")
-        tr.innerHTML = DOM.innerHTMLTransaction(transaction)
-        
+        tr.innerHTML = DOM.innerHTMLTransaction(transaction, index)
+        tr.dataset.index = index
         DOM.transactionContainer.appendChild(tr)
         
         
     },
 
     
-    innerHTMLTransaction(transaction){
+    innerHTMLTransaction(transaction, index){
         
         //a variável CSSclass é utilada para saber se o amount da transação é maior ou enor que zero para então determinarmos a class CSS que a transação terá.
         const CSSclass = transaction.amount > 0 ? "income" : "expense"
@@ -112,7 +105,7 @@ const DOM = {
             <td class="${CSSclass}">${formatAmount}</td>
             <td class="date">${transaction.date}</td>
             <td>
-                <img id="btnMinus" src="assets/img/minus.svg" alt="Remover transação">
+                <img onclick = "Transactions.remove(${index})" id="btnMinus" src="assets/img/minus.svg" alt="Remover transação">
             </td>
        
         `
@@ -130,6 +123,7 @@ const DOM = {
         DOM.transactionContainer.innerHTML = ""
     }
 }
+
 //objeto de funções uteis
 const Utils = {
     
@@ -150,10 +144,21 @@ const Utils = {
         })
 
         return signal + value
+    },
+
+    formatAmount(value){
+        value = Number(value.replace(/\,\./g, "")) * 100
+        return value
+    },
+
+    formatDate(date){
+        //a função split procura o token passado e quebra a string num array
+        const splittedDate = date.split("-")
+        return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
     }
 }
 
-
+//tratamento do formulário
 const Form = {
     description: document.querySelector("input#description"),
     amount: document.querySelector("input#amount"),
@@ -166,7 +171,7 @@ const Form = {
             date: Form.date.value
         }
     },
-
+    //validações
     validateFields(){
         const {description, amount, date } = Form.getValues()
 
@@ -175,28 +180,56 @@ const Form = {
         }
     },
 
+    formatValues(){
+        let {description, amount, date } = Form.getValues()
+
+        amount = Utils.formatAmount(amount)
+
+        date = Utils.formatDate(date)
+
+        return { description, amount, date }
+    },
+
+    clearFields(){
+        Form.description.value = ""
+        Form.amount.value = ""
+        Form.date.value = ""
+    },
+
     submit(e){
         e.preventDefault() //interrompe o funcionamento padrão
         
         try{
             Form.validateFields()
+            const transaction = Form.formatValues()
+            Transactions.add(transaction)
+            Modal.close()
         }catch(error){
             alert(error.message)
         }
-        
-        
-        
+ 
 
     }
 }
+
+//fluxo da aplicação
 const App = {
     init(){
         //o laço forEach vai chamar o método addTransaction() de acordo com  número de elemntos do array transactions. 
-        Transactions.all.forEach(t => {
-            DOM.addTrasaction(t)
+        Transactions.all.forEach((t, index) => {
+            DOM.addTrasaction(t, index)
         })
+
+        /*versão alternativa utilizando for tradicional
+        for(let i = 0; i < transactions.length; i++ ){
+            DOM.addTrasaction(transactions[i], i)
+        }*/
+
         //atualiza o balance
         DOM.updateBalance()
+
+        //atualiza o localStorage
+        Storage.set(Transactions.all)
     },
     reload(){
         DOM.clearTransactions()
