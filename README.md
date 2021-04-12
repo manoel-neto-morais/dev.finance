@@ -6,6 +6,8 @@ Simple web application created for didactic purposes.
 
 The application explores the well-used code structure in JavaScript using EcmaScript 6 standards. I also emphasize the use of localStorage as a form of storage simulating a CRUD only on the client-side.
 
+Link da aplicação: <https://manoel-neto-morais.github.io/dev.finance/>
+
 
 ## Credits
 
